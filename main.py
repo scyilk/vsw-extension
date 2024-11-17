@@ -10,6 +10,7 @@ from ulauncher.api.shared.action.RenderResultListAction import RenderResultListA
 from ulauncher.api.shared.action.ExtensionCustomAction import ExtensionCustomAction
 
 import logging
+
 logger = logging.getLogger(__name__)
 
 
@@ -23,29 +24,33 @@ class VSCodeWorkspaceOpen(Extension):
 
 class KeywordQueryEventListener(EventListener):
     def on_event(self, event, extension):
-        homefolder = os.environ['HOME']
-        workspace_files = glob.glob(homefolder + '/**/*.code-workspace', recursive=True)
+        homefolder = os.environ["HOME"]
+        workspace_files = glob.glob(homefolder + "/**/*.code-workspace", recursive=True)
         items = []
         for i in workspace_files:
-            data = {'workspace': i}
-            items.append(ExtensionResultItem(icon='images/visual-studio-code.png',
-                                            name=i.split('/')[-1].replace('.code-workspace', ''),
-                                            description=i,
-                                            on_enter=ExtensionCustomAction(data)))
+            data = {"workspace": i}
+            items.append(
+                ExtensionResultItem(
+                    icon="images/visual-studio-code.png",
+                    name=i.split("/")[-1].replace(".code-workspace", ""),
+                    description=i,
+                    on_enter=ExtensionCustomAction(data),
+                )
+            )
 
         return RenderResultListAction(items)
 
 
 class ItemEnterEventListener(EventListener):
 
-    def open_workspace(self, workspace):
-        subprocess.call(f"code {workspace}", shell=True)
+    def open_workspace(self, workspace, cmd):
+        subprocess.call(f"{cmd} {workspace}", shell=True)
 
     def on_event(self, event, extension):
         data = event.get_data()
-        workspace = data['workspace']
-        self.open_workspace(workspace)
+        workspace = data["workspace"]
+        self.open_workspace(workspace, extension.preferences["vs_cmd"])
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     VSCodeWorkspaceOpen().run()
